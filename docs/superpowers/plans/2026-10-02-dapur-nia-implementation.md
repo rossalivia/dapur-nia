@@ -8,7 +8,7 @@
 
 **Tech Stack:** Vite, React 18+, TypeScript, Tailwind CSS, shadcn/ui (preset `b1d9r2Zx7w`), `react-router-dom`, Firebase SDK v10+ (Cloud Firestore), Vitest, React Testing Library.
 
-**Spec:** [`docs/superpowers/specs/2026-10-02-dapur-nia-design.md`](file:///c:/Users/ASUS/Documents/Bootcamp%20Web%20Pro%20PLAN/dapur-nia/dapur-nia/docs/superpowers/specs/2026-10-02-dapur-nia-design.md)
+**Spec:** [`docs/superpowers/specs/2026-10-02-dapur-nia-design.md`](<file:///c:/Users/ASUS/Documents/Bootcamp%20Web%20Pro%20PLAN/dapur-nia/dapur-nia/docs/superpowers/specs/2026-10-02-dapur-nia-design.md>)
 
 ---
 
@@ -42,14 +42,17 @@
 ### Task 1: Scaffolding Proyek & Inisialisasi Toolchain
 
 **Files:**
+
 - Create: `package.json`, `vite.config.ts`, `tsconfig.json`, `tailwind.config.js`, `postcss.config.js`, `components.json`
 - Create: `src/App.tsx`, `src/main.tsx`, `src/index.css`
 - Test: `src/App.test.tsx`
 
 **Interfaces:**
+
 - Produces: Project root runnable via `npm run dev`, testable via `npm test`, styled with Tailwind and shadcn/ui baseline.
 
 - [ ] **Step 1: Write initial test for App mounting**
+
 ```tsx
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
@@ -62,15 +65,17 @@ describe('App', () => {
   });
 });
 ```
+
 - [ ] **Step 2: Run test to verify failure**
-Run: `npm test`
-Expected: FAIL (no test runner or App component yet).
+  Run: `npm test`
+  Expected: FAIL (no test runner or App component yet).
 - [ ] **Step 3: Initialize Vite React TypeScript project, Tailwind CSS, Vitest, and shadcn/ui preset**
-Inisialisasi project Vite React TypeScript, pasang dependensi `react-router-dom`, `lucide-react`, `firebase`, serta jalankan preset `npx shadcn@latest init --preset b1d9r2Zx7w --template vite`.
+  Inisialisasi project Vite React TypeScript, pasang dependensi `react-router-dom`, `lucide-react`, `firebase`, serta jalankan preset `npx shadcn@latest init --preset b1d9r2Zx7w --template vite`.
 - [ ] **Step 4: Run test to verify it passes**
-Run: `npm test`
-Expected: PASS.
+  Run: `npm test`
+  Expected: PASS.
 - [ ] **Step 5: Commit**
+
 ```bash
 git add .
 git commit -m "chore: initialize vite react ts project with tailwind and shadcn"
@@ -81,6 +86,7 @@ git commit -m "chore: initialize vite react ts project with tailwind and shadcn"
 ### Task 2: Setup Firebase, Types, Formatter, & Seeding Helper
 
 **Files:**
+
 - Create: `.env.example`, `.env`
 - Create: `src/lib/firebase.ts`
 - Create: `src/lib/formatters.ts`
@@ -89,6 +95,7 @@ git commit -m "chore: initialize vite react ts project with tailwind and shadcn"
 - Test: `src/lib/formatters.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `export const db = getFirestore(app);`
   - `formatRupiah(amount: number): string`
@@ -97,6 +104,7 @@ git commit -m "chore: initialize vite react ts project with tailwind and shadcn"
   - `seedInitialData(db: Firestore): Promise<void>`
 
 - [ ] **Step 1: Write unit tests for formatters and validation helpers**
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { formatRupiah, validateWhatsApp } from './formatters';
@@ -114,15 +122,17 @@ describe('formatters and validators', () => {
   });
 });
 ```
+
 - [ ] **Step 2: Run test to verify it fails**
-Run: `npm test src/lib/formatters.test.ts`
-Expected: FAIL with missing functions.
+  Run: `npm test src/lib/formatters.test.ts`
+  Expected: FAIL with missing functions.
 - [ ] **Step 3: Implement types, formatters, firebase initialization, and seed data**
-Buat `src/types/index.ts` dengan interface `Menu`, `Pelanggan`, `Pesanan`, implementasikan fungsi `formatRupiah` dan `validateWhatsApp` di `src/lib/formatters.ts`, konfigurasi `src/lib/firebase.ts`, dan skrip seeding di `src/lib/seedData.ts`.
+  Buat `src/types/index.ts` dengan interface `Menu`, `Pelanggan`, `Pesanan`, implementasikan fungsi `formatRupiah` dan `validateWhatsApp` di `src/lib/formatters.ts`, konfigurasi `src/lib/firebase.ts`, dan skrip seeding di `src/lib/seedData.ts`.
 - [ ] **Step 4: Run test to verify it passes**
-Run: `npm test src/lib/formatters.test.ts`
-Expected: PASS.
+  Run: `npm test src/lib/formatters.test.ts`
+  Expected: PASS.
 - [ ] **Step 5: Commit**
+
 ```bash
 git add src/types/ src/lib/ .env.example
 git commit -m "feat: setup firebase config, types, formatters, and seed data helper"
@@ -133,6 +143,7 @@ git commit -m "feat: setup firebase config, types, formatters, and seed data hel
 ### Task 3: Modul Menu (Service, Hook, Komponen CRUD, & Validasi Invariant 1)
 
 **Files:**
+
 - Create: `src/features/menu/services/menuService.ts`
 - Create: `src/features/menu/hooks/useMenu.ts`
 - Create: `src/features/menu/components/MenuCard.tsx`
@@ -142,6 +153,7 @@ git commit -m "feat: setup firebase config, types, formatters, and seed data hel
 - Test: `src/features/menu/services/menuService.test.ts`
 
 **Interfaces:**
+
 - Consumes: `db` from `src/lib/firebase.ts`, `Menu` from `src/types/index.ts`
 - Produces:
   - `menuService.getAllMenus(): Promise<Menu[]>`
@@ -152,6 +164,7 @@ git commit -m "feat: setup firebase config, types, formatters, and seed data hel
   - `<MenuFeature />` component for `/menu`
 
 - [ ] **Step 1: Write test for Invariant 1 in menuService**
+
 ```typescript
 import { describe, it, expect, vi } from 'vitest';
 import { validateMenuInput } from './menuService';
@@ -167,15 +180,17 @@ describe('validateMenuInput (Invariant 1)', () => {
   });
 });
 ```
+
 - [ ] **Step 2: Run test to verify it fails**
-Run: `npm test src/features/menu/services/menuService.test.ts`
-Expected: FAIL.
+  Run: `npm test src/features/menu/services/menuService.test.ts`
+  Expected: FAIL.
 - [ ] **Step 3: Implement menuService, useMenu, and Menu UI components**
-Tegakkan Invariant 1, implementasikan listener real-time `onSnapshot` pada koleksi `menu`, buat `MenuCard` dengan badge "Habis" jika `sisa_porsi === 0`, dan form Sheet dengan validasi nama 1–60 karakter.
+  Tegakkan Invariant 1, implementasikan listener real-time `onSnapshot` pada koleksi `menu`, buat `MenuCard` dengan badge "Habis" jika `sisa_porsi === 0`, dan form Sheet dengan validasi nama 1–60 karakter.
 - [ ] **Step 4: Run test to verify it passes**
-Run: `npm test src/features/menu/services/menuService.test.ts`
-Expected: PASS.
+  Run: `npm test src/features/menu/services/menuService.test.ts`
+  Expected: PASS.
 - [ ] **Step 5: Commit**
+
 ```bash
 git add src/features/menu/
 git commit -m "feat: implement menu module with real-time sync and invariant 1 check"
@@ -186,6 +201,7 @@ git commit -m "feat: implement menu module with real-time sync and invariant 1 c
 ### Task 4: Modul Pelanggan (Service, Hook, Komponen CRUD, & Validasi WhatsApp Unik)
 
 **Files:**
+
 - Create: `src/features/pelanggan/services/pelangganService.ts`
 - Create: `src/features/pelanggan/hooks/usePelanggan.ts`
 - Create: `src/features/pelanggan/components/PelangganCard.tsx`
@@ -195,6 +211,7 @@ git commit -m "feat: implement menu module with real-time sync and invariant 1 c
 - Test: `src/features/pelanggan/services/pelangganService.test.ts`
 
 **Interfaces:**
+
 - Consumes: `db` from `src/lib/firebase.ts`, `Pelanggan` from `src/types/index.ts`
 - Produces:
   - `pelangganService.addPelanggan(pelanggan: Pelanggan): Promise<void>` (ID = `no_whatsapp`)
@@ -203,6 +220,7 @@ git commit -m "feat: implement menu module with real-time sync and invariant 1 c
   - `<PelangganFeature />` component for `/pelanggan`
 
 - [ ] **Step 1: Write test for WhatsApp validation and uniqueness checks**
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { validatePelangganInput } from './pelangganService';
@@ -214,15 +232,17 @@ describe('validatePelangganInput', () => {
   });
 });
 ```
+
 - [ ] **Step 2: Run test to verify it fails**
-Run: `npm test src/features/pelanggan/services/pelangganService.test.ts`
-Expected: FAIL.
+  Run: `npm test src/features/pelanggan/services/pelangganService.test.ts`
+  Expected: FAIL.
 - [ ] **Step 3: Implement pelangganService, usePelanggan, and Pelanggan UI components**
-Gunakan `no_whatsapp` sebagai ID dokumen Firestore, cegah duplikasi dengan mengecek eksistensi ID, dan buat kartu pelanggan dengan tautan langsung `wa.me/62...`.
+  Gunakan `no_whatsapp` sebagai ID dokumen Firestore, cegah duplikasi dengan mengecek eksistensi ID, dan buat kartu pelanggan dengan tautan langsung `wa.me/62...`.
 - [ ] **Step 4: Run test to verify it passes**
-Run: `npm test src/features/pelanggan/services/pelangganService.test.ts`
-Expected: PASS.
+  Run: `npm test src/features/pelanggan/services/pelangganService.test.ts`
+  Expected: PASS.
 - [ ] **Step 5: Commit**
+
 ```bash
 git add src/features/pelanggan/
 git commit -m "feat: implement pelanggan module with whatsapp uniqueness validation"
@@ -233,6 +253,7 @@ git commit -m "feat: implement pelanggan module with whatsapp uniqueness validat
 ### Task 5: Modul Pesanan (Service, Hook, Komponen Pesanan, Invariant 2 & 3, & State Machine)
 
 **Files:**
+
 - Create: `src/features/pesanan/services/pesananService.ts`
 - Create: `src/features/pesanan/hooks/usePesanan.ts`
 - Create: `src/features/pesanan/components/PesananCard.tsx`
@@ -243,6 +264,7 @@ git commit -m "feat: implement pelanggan module with whatsapp uniqueness validat
 - Test: `src/features/pesanan/services/pesananService.test.ts`
 
 **Interfaces:**
+
 - Consumes: `db` from `src/lib/firebase.ts`, `Menu`, `Pelanggan`, `Pesanan`, `PesananStatus`
 - Produces:
   - `pesananService.createPesanan(data: CreatePesananDTO): Promise<string>`
@@ -251,6 +273,7 @@ git commit -m "feat: implement pelanggan module with whatsapp uniqueness validat
   - `<PesananFeature />` component for `/pesanan`
 
 - [ ] **Step 1: Write unit tests for Invariant 2, Invariant 3, and Status Transitions**
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { calculateTotal, isValidStatusTransition, validatePesananPortion } from './pesananService';
@@ -275,15 +298,17 @@ describe('Pesanan Invariants & State Machine', () => {
   });
 });
 ```
+
 - [ ] **Step 2: Run test to verify it fails**
-Run: `npm test src/features/pesanan/services/pesananService.test.ts`
-Expected: FAIL.
+  Run: `npm test src/features/pesanan/services/pesananService.test.ts`
+  Expected: FAIL.
 - [ ] **Step 3: Implement pesananService, usePesanan, and UI components**
-Implementasikan pembuatan pesanan dengan snapshot data, kurangi `sisa_porsi` menu saat pesanan dibuat, kembalikan porsi jika dibatalkan, dan tampilkan tombol transisi status dinamis hanya untuk langkah yang diizinkan.
+  Implementasikan pembuatan pesanan dengan snapshot data, kurangi `sisa_porsi` menu saat pesanan dibuat, kembalikan porsi jika dibatalkan, dan tampilkan tombol transisi status dinamis hanya untuk langkah yang diizinkan.
 - [ ] **Step 4: Run test to verify it passes**
-Run: `npm test src/features/pesanan/services/pesananService.test.ts`
-Expected: PASS.
+  Run: `npm test src/features/pesanan/services/pesananService.test.ts`
+  Expected: PASS.
 - [ ] **Step 5: Commit**
+
 ```bash
 git add src/features/pesanan/
 git commit -m "feat: implement pesanan module with strict invariants and state machine"
@@ -294,6 +319,7 @@ git commit -m "feat: implement pesanan module with strict invariants and state m
 ### Task 6: Modul Laporan Harian (Agregasi Query, Filter Tanggal, & Empty State)
 
 **Files:**
+
 - Create: `src/features/laporan/services/laporanService.ts`
 - Create: `src/features/laporan/hooks/useLaporan.ts`
 - Create: `src/features/laporan/components/LaporanSummaryCards.tsx`
@@ -302,6 +328,7 @@ git commit -m "feat: implement pesanan module with strict invariants and state m
 - Test: `src/features/laporan/services/laporanService.test.ts`
 
 **Interfaces:**
+
 - Consumes: `Pesanan` from `src/types/index.ts`
 - Produces:
   - `laporanService.getLaporanByDate(date: string): Promise<LaporanHarian>`
@@ -309,6 +336,7 @@ git commit -m "feat: implement pesanan module with strict invariants and state m
   - `<LaporanFeature />` component for `/laporan`
 
 - [ ] **Step 1: Write tests for aggregation logic excluding cancelled orders**
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { aggregateLaporan } from './laporanService';
@@ -329,15 +357,17 @@ describe('aggregateLaporan', () => {
   });
 });
 ```
+
 - [ ] **Step 2: Run test to verify it fails**
-Run: `npm test src/features/laporan/services/laporanService.test.ts`
-Expected: FAIL.
+  Run: `npm test src/features/laporan/services/laporanService.test.ts`
+  Expected: FAIL.
 - [ ] **Step 3: Implement laporanService, useLaporan, and Laporan UI components**
-Buat filter tanggal harian (format `YYYY-MM-DD`), hitung agregasi porsi dan uang masuk, tampilkan tabel ringkasan, dan sajikan `EmptyState` jika tidak ada pesanan aktif pada tanggal tersebut.
+  Buat filter tanggal harian (format `YYYY-MM-DD`), hitung agregasi porsi dan uang masuk, tampilkan tabel ringkasan, dan sajikan `EmptyState` jika tidak ada pesanan aktif pada tanggal tersebut.
 - [ ] **Step 4: Run test to verify it passes**
-Run: `npm test src/features/laporan/services/laporanService.test.ts`
-Expected: PASS.
+  Run: `npm test src/features/laporan/services/laporanService.test.ts`
+  Expected: PASS.
 - [ ] **Step 5: Commit**
+
 ```bash
 git add src/features/laporan/
 git commit -m "feat: implement laporan module with date query and cancelled filter"
@@ -348,6 +378,7 @@ git commit -m "feat: implement laporan module with date query and cancelled filt
 ### Task 7: Layout Utama, Mobile Bottom Navigation Bar, & Routing Integration
 
 **Files:**
+
 - Create: `src/components/layout/Header.tsx`
 - Create: `src/components/layout/BottomNav.tsx`
 - Create: `src/components/layout/MainLayout.tsx`
@@ -355,10 +386,12 @@ git commit -m "feat: implement laporan module with date query and cancelled filt
 - Test: `src/components/layout/BottomNav.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `<MenuFeature />`, `<PelangganFeature />`, `<PesananFeature />`, `<LaporanFeature />`
 - Produces: Integrated SPA with 4 mobile tabs: `/menu`, `/pelanggan`, `/pesanan`, `/laporan`, with `/` redirecting to `/menu`.
 
 - [ ] **Step 1: Write test for Bottom Navigation active tabs**
+
 ```tsx
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -379,15 +412,17 @@ describe('BottomNav', () => {
   });
 });
 ```
+
 - [ ] **Step 2: Run test to verify it fails**
-Run: `npm test src/components/layout/BottomNav.test.tsx`
-Expected: FAIL.
+  Run: `npm test src/components/layout/BottomNav.test.tsx`
+  Expected: FAIL.
 - [ ] **Step 3: Implement Header, BottomNav, MainLayout, and App routes**
-Rakit komponen `Header` (dengan tombol Seed Data cepat untuk testing), `BottomNav` dengan indikator aktif elegan, `MainLayout` mobile-centered (`max-w-md mx-auto`), dan `App.tsx` dengan konfigurasi router.
+  Rakit komponen `Header` (dengan tombol Seed Data cepat untuk testing), `BottomNav` dengan indikator aktif elegan, `MainLayout` mobile-centered (`max-w-md mx-auto`), dan `App.tsx` dengan konfigurasi router.
 - [ ] **Step 4: Run test to verify it passes**
-Run: `npm test src/components/layout/BottomNav.test.tsx`
-Expected: PASS.
+  Run: `npm test src/components/layout/BottomNav.test.tsx`
+  Expected: PASS.
 - [ ] **Step 5: Commit**
+
 ```bash
 git add src/components/layout/ src/App.tsx
 git commit -m "feat: implement main mobile layout and bottom navigation routing"
@@ -398,15 +433,18 @@ git commit -m "feat: implement main mobile layout and bottom navigation routing"
 ### Task 8: Pengujian Uji Tembus 6 Masukan Tidak Sah & Kesiapan Netlify
 
 **Files:**
+
 - Create: `src/features/verification/invalidInputs.test.ts`
 - Create: `public/_redirects`
 - Modify: `README.md`
 - Test: Full test suite (`npm test`) and build test (`npm run build`)
 
 **Interfaces:**
+
 - Produces: Verification report for the 6 invalid inputs test suite and ready-to-deploy build artifact in `dist/`.
 
 - [ ] **Step 1: Write integration tests covering the 6 invalid inputs (PRD Poin 8)**
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { validateMenuInput } from '@/features/menu/services/menuService';
@@ -442,15 +480,17 @@ describe('Uji Tembus 6 Masukan Tidak Sah (PRD Poin 8)', () => {
   });
 });
 ```
+
 - [ ] **Step 2: Run verification test to verify it passes**
-Run: `npm test src/features/verification/invalidInputs.test.ts`
-Expected: PASS.
+  Run: `npm test src/features/verification/invalidInputs.test.ts`
+  Expected: PASS.
 - [ ] **Step 3: Add `public/_redirects` and run production build**
-Tambahkan `public/_redirects` dengan konten `/* /index.html 200` dan jalankan `npm run build` untuk memvalidasi bundle produksi Netlify tanpa error TypeScript atau CSS.
+  Tambahkan `public/_redirects` dengan konten `/* /index.html 200` dan jalankan `npm run build` untuk memvalidasi bundle produksi Netlify tanpa error TypeScript atau CSS.
 - [ ] **Step 4: Verify build output**
-Run: `npm run build`
-Expected: `dist/` directory generated cleanly with exit code 0.
+  Run: `npm run build`
+  Expected: `dist/` directory generated cleanly with exit code 0.
 - [ ] **Step 5: Commit**
+
 ```bash
 git add public/_redirects src/features/verification/
 git commit -m "test: add 6 invalid inputs test suite and configure netlify redirects"
