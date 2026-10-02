@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatRupiah } from '@/lib/formatters';
-import { Utensils, DollarSign, ReceiptCheck } from 'lucide-react';
+import { Utensils, DollarSign, CheckCircle2 } from 'lucide-react';
 
 interface LaporanSummaryCardsProps {
   totalPorsiTerjual: number;
@@ -51,7 +51,7 @@ export const LaporanSummaryCards: React.FC<LaporanSummaryCardsProps> = ({
       <Card className="bg-card shadow-sm border border-border/80">
         <CardContent className="p-4 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-            <ReceiptCheck className="h-5 w-5" />
+            <CheckCircle2 className="h-5 w-5" />
           </div>
           <div>
             <span className="text-[11px] font-medium text-muted-foreground block">
