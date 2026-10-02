@@ -8,6 +8,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'dapur-nia-demo.appspot.com',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '123456789012',
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:123456789012:web:abcdef',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);

@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Koleksi menu
+    match /menu/{menuId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.harga >= 0 
+                            && request.resource.data.sisa_porsi >= 0
+                            && request.resource.data.nama is string
+                            && request.resource.data.nama.size() > 0
+                            && request.resource.data.nama.size() <= 60;
+      allow delete: if true;
+    }
+
+    // 2. Koleksi pelanggan (ID dokumen = no_whatsapp)
+    match /pelanggan/{noWhatsapp} {
+      allow read: if true;
+      allow create, update: if request.resource.data.no_whatsapp == noWhatsapp
+                            && request.resource.data.nama is string
+                            && request.resource.data.nama.size() > 0
+                            && request.resource.data.nama.size() <= 60
+                            && request.resource.data.alamat is string
+                            && request.resource.data.alamat.size() > 0
+                            && request.resource.data.alamat.size() <= 200;
+      allow delete: if true;
+    }
+
+    // 3. Koleksi pesanan
+    match /pesanan/{pesananId} {
+      allow read: if true;
+      allow create: if request.resource.data.jumlah_porsi >= 1
+                    && request.resource.data.ongkir >= 0
+                    && request.resource.data.total == (request.resource.data.harga_satuan * request.resource.data.jumlah_porsi) + request.resource.data.ongkir
+                    && request.resource.data.status in ['menunggu_bayar', 'dibayar', 'diproses', 'selesai', 'dibatalkan'];
+      allow update: if request.resource.data.status in ['menunggu_bayar', 'dibayar', 'diproses', 'selesai', 'dibatalkan'];
+      allow delete: if true;
+    }
+  }
+}
