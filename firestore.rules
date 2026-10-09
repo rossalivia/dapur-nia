@@ -1,40 +1,93 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // 1. Koleksi menu
+
+    // Helper functions (HRIS)
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthed() && request.auth.uid == uid;
+    }
+
+    function isHrd() {
+      return isAuthed() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'hrd';
+    }
+
+    // Koleksi users: profil pengguna (HRIS)
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isHrd();
+      allow create: if isOwner(uid) && 
+                       request.resource.data.role == "karyawan" &&
+                       request.resource.data.email is string &&
+                       request.resource.data.nama is string;
+      allow update: if (isOwner(uid) && 
+                        request.resource.data.role == resource.data.role &&
+                        request.resource.data.email == resource.data.email)
+                    || isHrd();
+      allow delete: if false;
+    }
+
+    // Koleksi presensi: catatan kehadiran harian (HRIS)
+    match /presensi/{presensiId} {
+      allow read: if isAuthed() && (resource.data.karyawanId == request.auth.uid || isHrd());
+      allow create: if isAuthed() && 
+                       request.resource.data.karyawanId == request.auth.uid &&
+                       request.resource.data.tanggal is string &&
+                       request.resource.data.jamMasuk is timestamp;
+      allow update: if (isAuthed() && 
+                        resource.data.karyawanId == request.auth.uid &&
+                        request.resource.data.karyawanId == resource.data.karyawanId &&
+                        request.resource.data.tanggal == resource.data.tanggal &&
+                        request.resource.data.jamMasuk == resource.data.jamMasuk)
+                    || isHrd();
+      allow delete: if false;
+    }
+
+    // Koleksi pengajuan_cuti: pengajuan cuti karyawan (HRIS)
+    match /pengajuan_cuti/{cutiId} {
+      allow read: if isAuthed() && (resource.data.karyawanId == request.auth.uid || isHrd());
+      allow create: if isAuthed() && 
+                       request.resource.data.karyawanId == request.auth.uid &&
+                       request.resource.data.status == "menunggu" &&
+                       request.resource.data.tanggalMulai is timestamp &&
+                       request.resource.data.tanggalSelesai is timestamp &&
+                       request.resource.data.alasan is string;
+      allow update: if isHrd() && 
+                       request.resource.data.status in ["menunggu", "disetujui", "ditolak"];
+      allow delete: if false;
+    }
+
+    // ==========================================
+    // KOLEKSI DAPUR NIA (Aplikasi Katering)
+    // ==========================================
+
+    // 1. Koleksi menu: katalog menu harian & stok porsi
     match /menu/{menuId} {
       allow read: if true;
-      allow create, update: if request.resource.data.harga >= 0 
-                            && request.resource.data.sisa_porsi >= 0
-                            && request.resource.data.nama is string
-                            && request.resource.data.nama.size() > 0
-                            && request.resource.data.nama.size() <= 60;
-      allow delete: if true;
+      allow write: if true;
     }
 
-    // 2. Koleksi pelanggan (ID dokumen = no_whatsapp)
+    // 2. Koleksi pelanggan: profil pelanggan (ID dokumen = no_whatsapp)
     match /pelanggan/{noWhatsapp} {
       allow read: if true;
-      allow create, update: if request.resource.data.no_whatsapp == noWhatsapp
-                            && request.resource.data.nama is string
-                            && request.resource.data.nama.size() > 0
-                            && request.resource.data.nama.size() <= 60
-                            && request.resource.data.alamat is string
-                            && request.resource.data.alamat.size() > 0
-                            && request.resource.data.alamat.size() <= 200;
-      allow delete: if true;
+      allow write: if true;
     }
 
-    // 3. Koleksi pesanan
+    // 3. Koleksi pesanan: riwayat pemesanan & alur status
     match /pesanan/{pesananId} {
       allow read: if true;
-      allow create: if request.resource.data.jumlah_porsi >= 1
-                    && request.resource.data.ongkir >= 0
-                    && request.resource.data.total == (request.resource.data.harga_satuan * request.resource.data.jumlah_porsi) + request.resource.data.ongkir
-                    && request.resource.data.status in ['menunggu_bayar', 'dibayar', 'diproses', 'selesai', 'dibatalkan'];
-      allow update: if request.resource.data.status in ['menunggu_bayar', 'dibayar', 'diproses', 'selesai', 'dibatalkan'];
-      allow delete: if true;
+      allow write: if true;
+    }
+
+    // Default deny untuk seluruh dokumen atau koleksi lain
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
+

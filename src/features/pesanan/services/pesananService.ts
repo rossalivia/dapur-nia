@@ -64,6 +64,8 @@ export interface CreatePesananDTO {
   ongkir: number;
   bukti_bayar?: string;
   tanggal?: string;
+  email_pelanggan?: string;
+  user_id?: string;
 }
 
 export const pesananService = {
@@ -109,6 +111,8 @@ export const pesananService = {
         status: 'menunggu_bayar',
         bukti_bayar: dto.bukti_bayar || '',
         tanggal: orderDate,
+        email_pelanggan: dto.email_pelanggan || '',
+        user_id: dto.user_id || '',
         dibuat_pada: serverTimestamp(),
       });
     });

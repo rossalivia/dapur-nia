@@ -10,15 +10,26 @@ export function useMenu() {
 
   useEffect(() => {
     setLoading(true);
-    const q = query(collection(db, 'menu'), orderBy('dibuat_pada', 'desc'));
+    const colRef = collection(db, 'menu');
 
     const unsubscribe = onSnapshot(
-      q,
+      colRef,
       (snapshot) => {
         const items = snapshot.docs.map((docSnap) => ({
           id: docSnap.id,
           ...docSnap.data(),
         })) as Menu[];
+
+        items.sort((a, b) => {
+          const getMillis = (t: any) => {
+            if (!t) return 0;
+            if (typeof t.toMillis === 'function') return t.toMillis();
+            if (t.seconds) return t.seconds * 1000;
+            return 0;
+          };
+          return getMillis(b.dibuat_pada) - getMillis(a.dibuat_pada);
+        });
+
         setMenus(items);
         setLoading(false);
         setError(null);

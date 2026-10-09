@@ -38,6 +38,8 @@ export interface Pesanan {
   status: PesananStatus;  // Status alur pesanan
   bukti_bayar?: string;   // Tautan bukti bayar / catatan
   tanggal: string;        // Format "YYYY-MM-DD"
+  email_pelanggan?: string;
+  user_id?: string;
   dibuat_pada?: Timestamp | any;
 }
 

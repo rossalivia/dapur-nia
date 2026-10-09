@@ -20,17 +20,29 @@ export const PesananSaya: React.FC = () => {
   const myPesanan = pesananList.filter((p: any) => {
     // 1. Cek kecocokan email jika tersimpan di dokumen pesanan
     if (user?.email && p.email_pelanggan) {
-      return p.email_pelanggan.toLowerCase() === user.email.toLowerCase();
+      if (p.email_pelanggan.toLowerCase() === user.email.toLowerCase()) return true;
     }
     // 2. Cek kecocokan user ID auth jika tersimpan
     if (user?.uid && p.user_id) {
-      return p.user_id === user.uid;
+      if (p.user_id === user.uid) return true;
     }
-    // 3. Cek kecocokan nomor WhatsApp DAN nama pelanggan
+    // 3. Cek kecocokan nomor WhatsApp
     if (profile?.no_whatsapp && p.pelanggan_id === profile.no_whatsapp) {
-      if (profile.nama && p.nama_pelanggan) {
-        return p.nama_pelanggan.toLowerCase().trim() === profile.nama.toLowerCase().trim();
-      }
+      return true;
+    }
+    // 4. Cek kecocokan nama pelanggan (misal: "rossalivia" untuk user rossalivia111@gmail.com)
+    const profileName = (profile?.nama || '').toLowerCase().trim();
+    const orderName = (p.nama_pelanggan || '').toLowerCase().trim();
+    const userEmailPrefix = (user?.email || '').split('@')[0].toLowerCase().trim();
+    const displayName = (user?.displayName || '').toLowerCase().trim();
+
+    if (
+      orderName &&
+      ((profileName && orderName === profileName) ||
+        (displayName && orderName === displayName) ||
+        (userEmailPrefix &&
+          (orderName.includes(userEmailPrefix) || userEmailPrefix.includes(orderName))))
+    ) {
       return true;
     }
     return false;

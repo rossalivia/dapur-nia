@@ -10,15 +10,26 @@ export function usePesanan() {
 
   useEffect(() => {
     setLoading(true);
-    const q = query(collection(db, 'pesanan'), orderBy('dibuat_pada', 'desc'));
+    const colRef = collection(db, 'pesanan');
 
     const unsubscribe = onSnapshot(
-      q,
+      colRef,
       (snapshot) => {
         const items = snapshot.docs.map((docSnap) => ({
           id: docSnap.id,
           ...docSnap.data(),
         })) as Pesanan[];
+
+        items.sort((a, b) => {
+          const getMillis = (t: any) => {
+            if (!t) return 0;
+            if (typeof t.toMillis === 'function') return t.toMillis();
+            if (t.seconds) return t.seconds * 1000;
+            return 0;
+          };
+          return getMillis(b.dibuat_pada) - getMillis(a.dibuat_pada);
+        });
+
         setPesananList(items);
         setLoading(false);
         setError(null);

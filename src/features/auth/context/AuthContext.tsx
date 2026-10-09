@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 import {
   isEmailAdmin,
   loginUser,
@@ -59,14 +59,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 assignedRole = 'admin';
               }
               foundProfile = { id: docSnap.id, ...data } as Pelanggan;
-            } else if (assignedRole === 'pelanggan') {
-              // Profil fallback jika didaftarkan via console atau Google
-              foundProfile = {
-                id: currentUser.uid,
+            } else {
+              // Profil stabil jika didaftarkan via Google atau belum ada di koleksi
+              const stableStorageKey = 'dapur_nia_wa_' + currentUser.uid;
+              let stablePhone = typeof window !== 'undefined' ? localStorage.getItem(stableStorageKey) : null;
+              if (!stablePhone) {
+                const numericDigits = currentUser.uid.replace(/\D/g, '').padEnd(8, '7').slice(0, 8);
+                stablePhone = '0812' + numericDigits;
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem(stableStorageKey, stablePhone);
+                }
+              }
+
+              const stableProfile: any = {
+                id: stablePhone,
                 nama: currentUser.displayName || currentUser.email.split('@')[0],
-                no_whatsapp: '0812' + Math.floor(10000000 + Math.random() * 90000000).toString(),
-                alamat: 'Alamat pengiriman belum diatur',
+                no_whatsapp: stablePhone,
+                alamat: 'Jl. Pemesanan Dapur Nia',
+                email: currentUser.email.toLowerCase(),
+                role: assignedRole,
+                user_id: currentUser.uid,
               };
+
+              try {
+                await setDoc(doc(db, 'pelanggan', stablePhone), stableProfile, { merge: true });
+              } catch (saveErr) {
+                console.warn('Gagal menyimpan profil fallback ke Firestore:', saveErr);
+              }
+
+              foundProfile = stableProfile as Pelanggan;
             }
           }
         } catch (e) {
