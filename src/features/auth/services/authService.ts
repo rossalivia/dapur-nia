@@ -13,15 +13,12 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { LoginDTO, RegisterPelangganDTO } from '../types';
+import { LoginDTO, RegisterDTO, UserRole } from '../types';
 import { Pelanggan } from '@/types';
 
 const DEFAULT_ADMIN_EMAILS = [
   'admin@dapurnia.com',
   'dina@dapurnia.com',
-  'dina@sedap.id',
-  'rossalivia111@gmail.com',
-  'liviaipo20@gmail.com',
 ];
 
 export function isEmailAdmin(email?: string | null): boolean {
@@ -56,7 +53,7 @@ export function formatAuthError(error: any): string {
     case 'auth/network-request-failed':
       return 'Koneksi internet bermasalah. Periksa jaringan Anda dan coba lagi.';
     case 'auth/popup-closed-by-user':
-      return 'Proses masuk Google dibatalkan.';
+      return 'Proses masuk dibatalkan.';
     case 'auth/too-many-requests':
       return 'Terlalu banyak percobaan masuk yang gagal. Silakan coba lagi beberapa saat lagi.';
     default:
@@ -82,8 +79,8 @@ export async function loginWithGoogle(): Promise<UserCredential> {
 }
 
 export async function registerPelanggan(
-  dto: RegisterPelangganDTO
-): Promise<{ userCredential: UserCredential; profile: Pelanggan }> {
+  dto: RegisterDTO
+): Promise<{ userCredential: UserCredential; profile: Pelanggan & { role?: UserRole } }> {
   const cleanPhone = dto.no_whatsapp.trim();
   if (!/^08\d{8,11}$/.test(cleanPhone)) {
     throw new Error('Nomor WhatsApp harus diawali 08 dan memiliki panjang 10-13 angka.');
@@ -100,12 +97,14 @@ export async function registerPelanggan(
     throw new Error(formatAuthError(err));
   }
 
+  const role = dto.role || 'pelanggan';
   const pelangganRef = doc(db, 'pelanggan', cleanPhone);
-  const pelangganData: Pelanggan = {
+  const pelangganData: Pelanggan & { role: UserRole } = {
     id: cleanPhone,
     nama: dto.nama.trim(),
     no_whatsapp: cleanPhone,
     alamat: dto.alamat.trim(),
+    role: role,
     dibuat_pada: serverTimestamp(),
   };
 

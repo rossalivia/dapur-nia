@@ -4,13 +4,14 @@ import { useAuth } from '../hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, UserPlus, Loader2, Eye, EyeOff } from 'lucide-react';
-
+import { AlertCircle, UserPlus, Loader2, Eye, EyeOff, ShieldCheck, User } from 'lucide-react';
+import { UserRole } from '../types';
 
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  const [role, setRole] = useState<UserRole>('pelanggan');
   const [formData, setFormData] = useState({
     nama: '',
     no_whatsapp: '',
@@ -42,9 +43,9 @@ export const RegisterPage: React.FC = () => {
     }
 
     if (!formData.alamat.trim()) {
-      errors.alamat = 'Alamat pengiriman wajib diisi.';
+      errors.alamat = 'Alamat wajib diisi.';
     } else if (formData.alamat.trim().length > 200) {
-      errors.alamat = 'Alamat pengiriman maksimal 200 karakter.';
+      errors.alamat = 'Alamat maksimal 200 karakter.';
     }
 
     if (!formData.email.trim()) {
@@ -93,6 +94,7 @@ export const RegisterPage: React.FC = () => {
         alamat: formData.alamat.trim(),
         email: formData.email.trim(),
         password: formData.password,
+        role: role,
       });
       navigate('/menu', { replace: true });
     } catch (err: any) {
@@ -105,17 +107,54 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-muted/20 flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md bg-background border border-border/70 rounded-2xl p-6 shadow-sm">
-        <div className="mb-6 text-center">
+        <div className="mb-5 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <UserPlus className="h-6 w-6" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">
-            Daftar Akun Pelanggan
+            Daftar Akun Dapur Nia
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            Bergabunglah untuk memesan katering harian lezat Dapur Nia
+            Pilih peran Anda untuk mulai menggunakan aplikasi
           </p>
         </div>
+
+        {/* Pilihan Peran Akun */}
+        <div className="mb-5 p-1 bg-muted/60 rounded-xl grid grid-cols-2 gap-1 border border-border/40">
+          <button
+            type="button"
+            onClick={() => setRole('pelanggan')}
+            className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+              role === 'pelanggan'
+                ? 'bg-background text-foreground shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <User className="h-3.5 w-3.5 text-blue-500" />
+            Pelanggan
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole('admin')}
+            className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+              role === 'admin'
+                ? 'bg-background text-foreground shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <ShieldCheck className="h-3.5 w-3.5 text-amber-500" />
+            Pengelola / Admin
+          </button>
+        </div>
+
+        {role === 'admin' && (
+          <div className="mb-4 p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
+            <ShieldCheck className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>
+              Akun ini akan didaftarkan sebagai <strong>Pengelola / Admin</strong> dengan akses penuh ke Menu, Pelanggan, Pesanan, dan Laporan.
+            </span>
+          </div>
+        )}
 
         {serverError && (
           <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
@@ -126,11 +165,13 @@ export const RegisterPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="nama">Nama Lengkap</Label>
+            <Label htmlFor="nama">
+              {role === 'admin' ? 'Nama Pengelola / Admin' : 'Nama Lengkap'}
+            </Label>
             <Input
               id="nama"
               name="nama"
-              placeholder="Contoh: Budi Santoso"
+              placeholder={role === 'admin' ? 'Contoh: Dina (Pemilik)' : 'Contoh: Budi Santoso'}
               value={formData.nama}
               onChange={handleChange}
               disabled={isSubmitting}
@@ -142,7 +183,7 @@ export const RegisterPage: React.FC = () => {
           </div>
 
           <div>
-            <Label htmlFor="no_whatsapp">Nomor WhatsApp</Label>
+            <Label htmlFor="no_whatsapp">Nomor WhatsApp / Kontak</Label>
             <Input
               id="no_whatsapp"
               name="no_whatsapp"
@@ -154,7 +195,7 @@ export const RegisterPage: React.FC = () => {
               className="mt-1"
             />
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Diawali 08, 10–13 angka (digunakan untuk notifikasi & pengiriman)
+              Diawali 08, 10–13 angka
             </p>
             {fieldErrors.no_whatsapp && (
               <p className="mt-1 text-xs text-destructive">{fieldErrors.no_whatsapp}</p>
@@ -162,7 +203,9 @@ export const RegisterPage: React.FC = () => {
           </div>
 
           <div>
-            <Label htmlFor="alamat">Alamat Pengiriman</Label>
+            <Label htmlFor="alamat">
+              {role === 'admin' ? 'Alamat Kantor / Dapur' : 'Alamat Pengiriman'}
+            </Label>
             <textarea
               id="alamat"
               name="alamat"
@@ -184,7 +227,7 @@ export const RegisterPage: React.FC = () => {
               id="email"
               name="email"
               type="email"
-              placeholder="email@contoh.com"
+              placeholder={role === 'admin' ? 'dina@dapurnia.com' : 'email@contoh.com'}
               value={formData.email}
               onChange={handleChange}
               disabled={isSubmitting}
@@ -247,10 +290,10 @@ export const RegisterPage: React.FC = () => {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Mendaftarkan...
+                Mendaftarkan Akun...
               </>
             ) : (
-              'Daftar Akun'
+              `Daftar Akun ${role === 'admin' ? 'Pengelola' : 'Pelanggan'}`
             )}
           </Button>
         </form>

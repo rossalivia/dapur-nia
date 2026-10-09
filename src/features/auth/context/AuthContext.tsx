@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import {
   isEmailAdmin,
   loginUser,
@@ -9,7 +9,7 @@ import {
   registerPelanggan,
   logoutUser,
 } from '../services/authService';
-import { LoginDTO, RegisterPelangganDTO, UserRole } from '../types';
+import { LoginDTO, RegisterDTO, UserRole } from '../types';
 import { Pelanggan } from '@/types';
 
 export interface AuthContextType {
@@ -20,7 +20,7 @@ export interface AuthContextType {
   error: string | null;
   login: (dto: LoginDTO) => Promise<void>;
   loginGoogle: () => Promise<void>;
-  register: (dto: RegisterPelangganDTO) => Promise<void>;
+  register: (dto: RegisterDTO) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -37,36 +37,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
+        let assignedRole: UserRole = 'pelanggan';
+        let foundProfile: Pelanggan | null = null;
+
+        // Cek jika email masuk daftar admin default
         if (isEmailAdmin(currentUser.email)) {
-          setRole('admin');
-          setProfile(null);
-        } else {
-          setRole('pelanggan');
-          try {
-            if (currentUser.email) {
-              const q = query(
-                collection(db, 'pelanggan'),
-                where('email', '==', currentUser.email.toLowerCase())
-              );
-              const snap = await getDocs(q);
-              if (!snap.empty) {
-                const docSnap = snap.docs[0];
-                setProfile({ id: docSnap.id, ...docSnap.data() } as Pelanggan);
-              } else {
-                // Buat profil fallback agar tidak kosong saat login akun bawaan / Google
-                const fallbackProfile: Pelanggan = {
-                  id: currentUser.uid,
-                  nama: currentUser.displayName || currentUser.email.split('@')[0],
-                  no_whatsapp: '0812' + Math.floor(10000000 + Math.random() * 90000000).toString(),
-                  alamat: 'Alamat pengiriman belum diatur',
-                };
-                setProfile(fallbackProfile);
-              }
-            }
-          } catch (e) {
-            console.warn('Error fetching user profile:', e);
-          }
+          assignedRole = 'admin';
         }
+
+        try {
+          if (currentUser.email) {
+            const q = query(
+              collection(db, 'pelanggan'),
+              where('email', '==', currentUser.email.toLowerCase())
+            );
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+              const docSnap = snap.docs[0];
+              const data = docSnap.data();
+              if (data.role === 'admin') {
+                assignedRole = 'admin';
+              }
+              foundProfile = { id: docSnap.id, ...data } as Pelanggan;
+            } else if (assignedRole === 'pelanggan') {
+              // Profil fallback jika didaftarkan via console atau Google
+              foundProfile = {
+                id: currentUser.uid,
+                nama: currentUser.displayName || currentUser.email.split('@')[0],
+                no_whatsapp: '0812' + Math.floor(10000000 + Math.random() * 90000000).toString(),
+                alamat: 'Alamat pengiriman belum diatur',
+              };
+            }
+          }
+        } catch (e) {
+          console.warn('Error fetching user profile:', e);
+        }
+
+        setRole(assignedRole);
+        setProfile(foundProfile);
       } else {
         setRole(null);
         setProfile(null);
@@ -97,12 +105,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (dto: RegisterPelangganDTO) => {
+  const register = async (dto: RegisterDTO) => {
     setError(null);
     try {
       const res = await registerPelanggan(dto);
       setProfile(res.profile);
-      setRole('pelanggan');
+      setRole(dto.role || 'pelanggan');
     } catch (err: any) {
       setError(err.message);
       throw err;
