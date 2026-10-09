@@ -1,6 +1,8 @@
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   UserCredential,
 } from 'firebase/auth';
@@ -14,12 +16,18 @@ import { auth, db } from '@/lib/firebase';
 import { LoginDTO, RegisterPelangganDTO } from '../types';
 import { Pelanggan } from '@/types';
 
-const DEFAULT_ADMIN_EMAILS = ['admin@dapurnia.com', 'dina@dapurnia.com'];
+const DEFAULT_ADMIN_EMAILS = [
+  'admin@dapurnia.com',
+  'dina@dapurnia.com',
+  'dina@sedap.id',
+  'rossalivia111@gmail.com',
+  'liviaipo20@gmail.com',
+];
 
 export function isEmailAdmin(email?: string | null): boolean {
   if (!email) return false;
   const normalized = email.trim().toLowerCase();
-  
+
   const envAdminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '')
     .split(',')
     .map((e: string) => e.trim().toLowerCase())
@@ -37,6 +45,7 @@ export function formatAuthError(error: any): string {
     case 'auth/invalid-credential':
     case 'auth/user-not-found':
     case 'auth/wrong-password':
+    case 'INVALID_LOGIN_CREDENTIALS':
       return 'Email atau kata sandi yang Anda masukkan salah.';
     case 'auth/email-already-in-use':
       return 'Email ini sudah terdaftar. Silakan gunakan email lain atau masuk ke akun Anda.';
@@ -46,6 +55,8 @@ export function formatAuthError(error: any): string {
       return 'Format alamat email tidak valid.';
     case 'auth/network-request-failed':
       return 'Koneksi internet bermasalah. Periksa jaringan Anda dan coba lagi.';
+    case 'auth/popup-closed-by-user':
+      return 'Proses masuk Google dibatalkan.';
     case 'auth/too-many-requests':
       return 'Terlalu banyak percobaan masuk yang gagal. Silakan coba lagi beberapa saat lagi.';
     default:
@@ -61,16 +72,23 @@ export async function loginUser(dto: LoginDTO): Promise<UserCredential> {
   }
 }
 
+export async function loginWithGoogle(): Promise<UserCredential> {
+  try {
+    const provider = new GoogleAuthProvider();
+    return await signInWithPopup(auth, provider);
+  } catch (err: any) {
+    throw new Error(formatAuthError(err));
+  }
+}
+
 export async function registerPelanggan(
   dto: RegisterPelangganDTO
 ): Promise<{ userCredential: UserCredential; profile: Pelanggan }> {
-  // 1. Validasi awal nomor WhatsApp (08, 10-13 digit)
   const cleanPhone = dto.no_whatsapp.trim();
   if (!/^08\d{8,11}$/.test(cleanPhone)) {
     throw new Error('Nomor WhatsApp harus diawali 08 dan memiliki panjang 10-13 angka.');
   }
 
-  // 2. Buat akun Firebase Authentication
   let userCredential: UserCredential;
   try {
     userCredential = await createUserWithEmailAndPassword(
@@ -82,7 +100,6 @@ export async function registerPelanggan(
     throw new Error(formatAuthError(err));
   }
 
-  // 3. Simpan/sinkronkan data pelanggan ke Firestore
   const pelangganRef = doc(db, 'pelanggan', cleanPhone);
   const pelangganData: Pelanggan = {
     id: cleanPhone,
@@ -98,8 +115,7 @@ export async function registerPelanggan(
       email: dto.email.trim().toLowerCase(),
     });
   } catch (err: any) {
-    console.error('Failed to sync profile to Firestore:', err);
-    // Kita tidak batalkan auth jika Firestore lambat, tapi tetap kembalikan profil lokal
+    console.warn('Gagal menyimpan profil ke Firestore pelanggan:', err);
   }
 
   return { userCredential, profile: pelangganData };

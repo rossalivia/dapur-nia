@@ -6,6 +6,7 @@ import { LoginPage } from './LoginPage';
 import { AuthContext } from '../context/AuthContext';
 
 const mockLogin = vi.fn();
+const mockLoginGoogle = vi.fn();
 
 const renderWithContext = () => {
   return render(
@@ -17,6 +18,7 @@ const renderWithContext = () => {
         loading: false,
         error: null,
         login: mockLogin,
+        loginGoogle: mockLoginGoogle,
         register: vi.fn(),
         logout: vi.fn(),
       }}
@@ -34,16 +36,18 @@ describe('LoginPage Component', () => {
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Kata Sandi/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Masuk ke Akun/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Masuk dengan Google/i })).toBeInTheDocument();
   });
 
-  it('populates demo credentials when demo buttons are clicked', () => {
+  it('calls loginGoogle when Google button is clicked', async () => {
     renderWithContext();
 
-    const adminDemoBtn = screen.getByRole('button', { name: /Demo Admin/i });
-    fireEvent.click(adminDemoBtn);
+    const googleBtn = screen.getByRole('button', { name: /Masuk dengan Google/i });
+    fireEvent.click(googleBtn);
 
-    const emailInput = screen.getByLabelText(/Email/i) as HTMLInputElement;
-    expect(emailInput.value).toBe('admin@dapurnia.com');
+    await waitFor(() => {
+      expect(mockLoginGoogle).toHaveBeenCalled();
+    });
   });
 
   it('calls login with email and password on submit', async () => {

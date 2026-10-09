@@ -17,6 +17,7 @@ const renderWithContext = () => {
         loading: false,
         error: null,
         login: vi.fn(),
+        loginGoogle: vi.fn(),
         register: mockRegister,
         logout: vi.fn(),
       }}

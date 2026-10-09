@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import {
   isEmailAdmin,
   loginUser,
+  loginWithGoogle,
   registerPelanggan,
   logoutUser,
-  fetchPelangganProfile,
 } from '../services/authService';
 import { LoginDTO, RegisterPelangganDTO, UserRole } from '../types';
 import { Pelanggan } from '@/types';
@@ -19,6 +19,7 @@ export interface AuthContextType {
   loading: boolean;
   error: string | null;
   login: (dto: LoginDTO) => Promise<void>;
+  loginGoogle: () => Promise<void>;
   register: (dto: RegisterPelangganDTO) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -41,7 +42,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(null);
         } else {
           setRole('pelanggan');
-          // Cari profil pelanggan berdasarkan email di Firestore
           try {
             if (currentUser.email) {
               const q = query(
@@ -52,6 +52,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               if (!snap.empty) {
                 const docSnap = snap.docs[0];
                 setProfile({ id: docSnap.id, ...docSnap.data() } as Pelanggan);
+              } else {
+                // Buat profil fallback agar tidak kosong saat login akun bawaan / Google
+                const fallbackProfile: Pelanggan = {
+                  id: currentUser.uid,
+                  nama: currentUser.displayName || currentUser.email.split('@')[0],
+                  no_whatsapp: '0812' + Math.floor(10000000 + Math.random() * 90000000).toString(),
+                  alamat: 'Alamat pengiriman belum diatur',
+                };
+                setProfile(fallbackProfile);
               }
             }
           } catch (e) {
@@ -72,6 +81,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     try {
       await loginUser(dto);
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
+  const loginGoogle = async () => {
+    setError(null);
+    try {
+      await loginWithGoogle();
     } catch (err: any) {
       setError(err.message);
       throw err;
@@ -107,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         error,
         login,
+        loginGoogle,
         register,
         logout,
       }}
