@@ -7,19 +7,33 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { Pesanan } from '@/types';
-import { ShoppingBag, ArrowRight } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const PesananSaya: React.FC = () => {
   const { pesananList, loading, error } = usePesanan();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [selectedPesanan, setSelectedPesanan] = useState<Pesanan | null>(null);
 
-  // Filter pesanan sesuai nomor whatsapp pelanggan yang login
-  const myPesanan = pesananList.filter((p) => {
-    if (!profile?.no_whatsapp) return false;
-    return p.pelanggan_id === profile.no_whatsapp;
+  // Filter pesanan khusus pelanggan yang sedang login (keamanan & privasi)
+  const myPesanan = pesananList.filter((p: any) => {
+    // 1. Cek kecocokan email jika tersimpan di dokumen pesanan
+    if (user?.email && p.email_pelanggan) {
+      return p.email_pelanggan.toLowerCase() === user.email.toLowerCase();
+    }
+    // 2. Cek kecocokan user ID auth jika tersimpan
+    if (user?.uid && p.user_id) {
+      return p.user_id === user.uid;
+    }
+    // 3. Cek kecocokan nomor WhatsApp DAN nama pelanggan
+    if (profile?.no_whatsapp && p.pelanggan_id === profile.no_whatsapp) {
+      if (profile.nama && p.nama_pelanggan) {
+        return p.nama_pelanggan.toLowerCase().trim() === profile.nama.toLowerCase().trim();
+      }
+      return true;
+    }
+    return false;
   });
 
   return (
@@ -42,7 +56,7 @@ export const PesananSaya: React.FC = () => {
       {!loading && !error && myPesanan.length === 0 && (
         <EmptyState
           title="Belum Ada Pesanan"
-          description="Anda belum pernah melakukan pemesanan katering. Yuk, pilih menu lezat hari ini!"
+          description="Anda belum memiliki pesanan katering. Yuk, pilih menu lezat hari ini!"
           actionLabel="Lihat Menu Katering"
           onAction={() => navigate('/menu')}
         />

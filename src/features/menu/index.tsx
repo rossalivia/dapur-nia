@@ -3,7 +3,7 @@ import { useMenu } from './hooks/useMenu';
 import { menuService } from './services/menuService';
 import { MenuList } from './components/MenuList';
 import { MenuFormSheet } from './components/MenuFormSheet';
-import { PesananFormSheet } from '@/features/pesanan/components/PesananFormSheet';
+import { PelangganOrderDialog } from './components/PelangganOrderDialog';
 import { pesananService, CreatePesananDTO } from '@/features/pesanan/services/pesananService';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/shared/LoadingState';
@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const MenuFeature: React.FC = () => {
   const { menus, loading, error } = useMenu();
-  const { role, profile } = useAuth();
+  const { role, profile, user } = useAuth();
   const navigate = useNavigate();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -64,18 +64,6 @@ export const MenuFeature: React.FC = () => {
     navigate('/pesanan-saya');
   };
 
-  // Siapkan data pelanggan untuk form pemesanan
-  const currentPelangganList: Pelanggan[] = profile
-    ? [profile]
-    : [
-        {
-          id: '081234567890',
-          nama: 'Pelanggan',
-          no_whatsapp: '081234567890',
-          alamat: 'Alamat pengiriman',
-        },
-      ];
-
   return (
     <div className="space-y-4 pb-20">
       <div className="flex items-center justify-between">
@@ -123,14 +111,16 @@ export const MenuFeature: React.FC = () => {
         />
       )}
 
-      {/* Sheet untuk Pelanggan Melakukan Pemesanan */}
+      {/* Dialog Pemesanan Khusus Pelanggan */}
       {!isAdmin && (
-        <PesananFormSheet
+        <PelangganOrderDialog
           isOpen={isOrderOpen}
           onClose={() => setIsOrderOpen(false)}
           onSubmit={handleCreatePesanan}
-          menus={selectedMenu ? [selectedMenu] : menus}
-          pelangganList={currentPelangganList}
+          menu={selectedMenu}
+          profile={profile}
+          userEmail={user?.email}
+          userId={user?.uid}
         />
       )}
     </div>
