@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { formatRupiah } from '@/lib/formatters';
 import { getStatusBadge } from './PesananCard';
 import { pesananService, getAllowedStatusTransitions } from '../services/pesananService';
 import { User, MapPin, Utensils, Receipt, MessageCircle, AlertTriangle } from 'lucide-react';
+import { AuthContext } from '@/features/auth/context/AuthContext';
 
 interface PesananDetailSheetProps {
   isOpen: boolean;
@@ -28,6 +29,9 @@ export const PesananDetailSheet: React.FC<PesananDetailSheetProps> = ({
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const authContext = useContext(AuthContext);
+  const isPelanggan = authContext?.role === 'pelanggan';
 
   if (!pesanan) return null;
 
@@ -145,65 +149,67 @@ export const PesananDetailSheet: React.FC<PesananDetailSheetProps> = ({
             </div>
           ) : null}
 
-          {/* Status lifecycle actions */}
-          <div className="space-y-2 pt-2">
-            <span className="font-semibold text-muted-foreground block">
-              Tindakan Status:
-            </span>
+          {/* Status lifecycle actions (Hanya untuk Admin / Pengelola) */}
+          {!isPelanggan && (
+            <div className="space-y-2 pt-2">
+              <span className="font-semibold text-muted-foreground block">
+                Tindakan Status:
+              </span>
 
-            {allowedTransitions.length === 0 ? (
-              <p className="text-muted-foreground text-[11px] italic bg-muted/20 p-2 rounded text-center">
-                Pesanan berada pada status akhir ({pesanan.status}). Status terkunci dan tidak dapat diubah lagi.
-              </p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {allowedTransitions.includes('dibayar') && (
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                    disabled={isUpdating}
-                    onClick={() => handleUpdateStatus('dibayar')}
-                  >
-                    Konfirmasi Dibayar
-                  </Button>
-                )}
+              {allowedTransitions.length === 0 ? (
+                <p className="text-muted-foreground text-[11px] italic bg-muted/20 p-2 rounded text-center">
+                  Pesanan berada pada status akhir ({pesanan.status}). Status terkunci dan tidak dapat diubah lagi.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {allowedTransitions.includes('dibayar') && (
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                      disabled={isUpdating}
+                      onClick={() => handleUpdateStatus('dibayar')}
+                    >
+                      Konfirmasi Dibayar
+                    </Button>
+                  )}
 
-                {allowedTransitions.includes('diproses') && (
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
-                    disabled={isUpdating}
-                    onClick={() => handleUpdateStatus('diproses')}
-                  >
-                    Proses Pesanan
-                  </Button>
-                )}
+                  {allowedTransitions.includes('diproses') && (
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                      disabled={isUpdating}
+                      onClick={() => handleUpdateStatus('diproses')}
+                    >
+                      Proses Pesanan
+                    </Button>
+                  )}
 
-                {allowedTransitions.includes('selesai') && (
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-                    disabled={isUpdating}
-                    onClick={() => handleUpdateStatus('selesai')}
-                  >
-                    Selesaikan Pesanan
-                  </Button>
-                )}
+                  {allowedTransitions.includes('selesai') && (
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                      disabled={isUpdating}
+                      onClick={() => handleUpdateStatus('selesai')}
+                    >
+                      Selesaikan Pesanan
+                    </Button>
+                  )}
 
-                {allowedTransitions.includes('dibatalkan') && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-destructive hover:bg-destructive/10 border-destructive/40"
-                    disabled={isUpdating}
-                    onClick={() => handleUpdateStatus('dibatalkan')}
-                  >
-                    Batalkan Pesanan
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
+                  {allowedTransitions.includes('dibatalkan') && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-destructive hover:bg-destructive/10 border-destructive/40"
+                      disabled={isUpdating}
+                      onClick={() => handleUpdateStatus('dibatalkan')}
+                    >
+                      Batalkan Pesanan
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <DialogFooter className="pt-2">
