@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, LogIn, Loader2, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { AlertCircle, LogIn, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { login, loginGoogle } = useAuth();
@@ -171,23 +171,10 @@ export const LoginPage: React.FC = () => {
           Masuk dengan Google
         </Button>
 
-        <div className="mt-4 p-3 bg-muted/40 rounded-xl border border-border/50 text-[11px] text-muted-foreground space-y-1">
-          <div className="flex items-center gap-1.5 font-medium text-foreground">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-            <span>Informasi Peran Pengguna:</span>
-          </div>
-          <p>
-            • <strong>Admin / Pengelola:</strong> Masuk dengan akun pengelola yang terdaftar (seperti <span className="text-primary font-mono">dina@sedap.id</span>).
-          </p>
-          <p>
-            • <strong>Pelanggan:</strong> Pelanggan baru dapat mendaftar langsung melalui tombol di bawah.
-          </p>
-        </div>
-
-        <div className="mt-5 text-center text-xs text-muted-foreground">
+        <div className="mt-6 text-center text-xs text-muted-foreground">
           Belum punya akun?{' '}
           <Link to="/register" className="font-semibold text-primary hover:underline">
-            Daftar sebagai Pelanggan
+            Daftar Akun Baru
           </Link>
         </div>
       </div>
