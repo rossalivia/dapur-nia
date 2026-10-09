@@ -3,16 +3,26 @@ import { useMenu } from './hooks/useMenu';
 import { menuService } from './services/menuService';
 import { MenuList } from './components/MenuList';
 import { MenuFormSheet } from './components/MenuFormSheet';
+import { PesananFormSheet } from '@/features/pesanan/components/PesananFormSheet';
+import { pesananService, CreatePesananDTO } from '@/features/pesanan/services/pesananService';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
-import { Menu } from '@/types';
-import { Plus, Utensils } from 'lucide-react';
+import { Menu, Pelanggan } from '@/types';
+import { Plus, Utensils, UtensilsCrossed } from 'lucide-react';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export const MenuFeature: React.FC = () => {
   const { menus, loading, error } = useMenu();
+  const { role, profile } = useAuth();
+  const navigate = useNavigate();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
+  const [isOrderOpen, setIsOrderOpen] = useState(false);
+
+  const isAdmin = role === 'admin';
 
   const handleAddNew = () => {
     setSelectedMenu(null);
@@ -42,22 +52,52 @@ export const MenuFeature: React.FC = () => {
     }
   };
 
+  const handleOrder = (menu: Menu) => {
+    setSelectedMenu(menu);
+    setIsOrderOpen(true);
+  };
+
+  const handleCreatePesanan = async (dto: CreatePesananDTO) => {
+    await pesananService.createPesanan(dto);
+    setIsOrderOpen(false);
+    alert('Pesanan berhasil dibuat! Anda dapat melihat statusnya di menu "Pesanan Saya".');
+    navigate('/pesanan-saya');
+  };
+
+  // Siapkan data pelanggan untuk form pemesanan
+  const currentPelangganList: Pelanggan[] = profile
+    ? [profile]
+    : [
+        {
+          id: '081234567890',
+          nama: 'Pelanggan',
+          no_whatsapp: '081234567890',
+          alamat: 'Alamat pengiriman',
+        },
+      ];
+
   return (
     <div className="space-y-4 pb-20">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
             <Utensils className="h-5 w-5 text-primary" />
-            Menu Harian
+            {isAdmin ? 'Menu Harian' : 'Pilihan Menu Katering'}
           </h1>
           <p className="text-xs text-muted-foreground">
-            Kelola daftar menu, harga porsi, dan ketersediaan stok
+            {isAdmin
+              ? 'Kelola daftar menu, harga porsi, dan ketersediaan stok'
+              : 'Pilihan menu harian lezat & higienis siap dipesan'}
           </p>
         </div>
-        <Button onClick={handleAddNew} size="sm" className="gap-1 shadow-sm">
-          <Plus className="h-4 w-4" />
-          Tambah
-        </Button>
+
+        {/* Hanya Pengelola / Admin yang bisa menambah menu baru */}
+        {isAdmin && (
+          <Button onClick={handleAddNew} size="sm" className="gap-1 shadow-sm">
+            <Plus className="h-4 w-4" />
+            Tambah
+          </Button>
+        )}
       </div>
 
       {loading && <LoadingState message="Memuat daftar menu katering..." />}
@@ -65,18 +105,34 @@ export const MenuFeature: React.FC = () => {
       {!loading && !error && (
         <MenuList
           menus={menus}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAddNew={handleAddNew}
+          onEdit={isAdmin ? handleEdit : undefined}
+          onDelete={isAdmin ? handleDelete : undefined}
+          onAddNew={isAdmin ? handleAddNew : undefined}
+          onOrder={handleOrder}
+          role={role}
         />
       )}
 
-      <MenuFormSheet
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleSubmit}
-        initialData={selectedMenu}
-      />
+      {/* Sheet untuk Admin Menambah/Mengubah Menu */}
+      {isAdmin && (
+        <MenuFormSheet
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          onSubmit={handleSubmit}
+          initialData={selectedMenu}
+        />
+      )}
+
+      {/* Sheet untuk Pelanggan Melakukan Pemesanan */}
+      {!isAdmin && (
+        <PesananFormSheet
+          isOpen={isOrderOpen}
+          onClose={() => setIsOrderOpen(false)}
+          onSubmit={handleCreatePesanan}
+          menus={selectedMenu ? [selectedMenu] : menus}
+          pelangganList={currentPelangganList}
+        />
+      )}
     </div>
   );
 };
