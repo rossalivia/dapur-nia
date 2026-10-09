@@ -1,14 +1,25 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Utensils, Users, ShoppingBag, BarChart3 } from 'lucide-react';
+import { AuthContext } from '@/features/auth/context/AuthContext';
 
 export const BottomNav: React.FC = () => {
-  const navItems = [
+  const authContext = useContext(AuthContext);
+  const role = authContext?.role;
+
+  const adminNavItems = [
     { to: '/menu', label: 'Menu', icon: Utensils },
     { to: '/pelanggan', label: 'Pelanggan', icon: Users },
     { to: '/pesanan', label: 'Pesanan', icon: ShoppingBag },
     { to: '/laporan', label: 'Laporan', icon: BarChart3 },
   ];
+
+  const pelangganNavItems = [
+    { to: '/menu', label: 'Menu & Pesan', icon: Utensils },
+    { to: '/pesanan-saya', label: 'Pesanan Saya', icon: ShoppingBag },
+  ];
+
+  const navItems = role === 'pelanggan' ? pelangganNavItems : adminNavItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background/90 backdrop-blur-md border-t border-border shadow-lg">
