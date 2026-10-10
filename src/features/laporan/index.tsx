@@ -33,20 +33,59 @@ export const LaporanFeature: React.FC = () => {
 
       {/* Date Filter Card */}
       <Card className="bg-card shadow-sm border border-border/80">
-        <CardContent className="p-3.5 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-            <Calendar className="h-4 w-4 text-primary shrink-0" />
-            <Label htmlFor="laporan-date" className="cursor-pointer text-xs">
-              Pilih Tanggal:
-            </Label>
+        <CardContent className="p-3.5 space-y-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+              <Calendar className="h-4 w-4 text-primary shrink-0" />
+              <Label htmlFor="laporan-date" className="cursor-pointer text-xs">
+                Pilih Tanggal:
+              </Label>
+            </div>
+            <Input
+              id="laporan-date"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-auto h-8 text-xs font-medium"
+            />
           </div>
-          <Input
-            id="laporan-date"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-auto h-8 text-xs font-medium"
-          />
+
+          <div className="flex items-center gap-1.5 pt-1 border-t border-border/50 text-xs">
+            <span className="text-[10px] text-muted-foreground mr-1">Pintasan:</span>
+            <button
+              type="button"
+              onClick={() => {
+                const d = new Date();
+                d.setDate(d.getDate() - 1);
+                setSelectedDate(d.toISOString().split('T')[0]);
+              }}
+              className="px-2 py-0.5 rounded text-[11px] bg-muted hover:bg-muted/80 text-foreground font-medium"
+            >
+              Kemarin
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedDate(getTodayDateString())}
+              className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                selectedDate === getTodayDateString()
+                  ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                  : 'bg-muted hover:bg-muted/80 text-foreground'
+              }`}
+            >
+              Hari Ini
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const d = new Date();
+                d.setDate(d.getDate() + 1);
+                setSelectedDate(d.toISOString().split('T')[0]);
+              }}
+              className="px-2 py-0.5 rounded text-[11px] bg-muted hover:bg-muted/80 text-foreground font-medium"
+            >
+              Besok
+            </button>
+          </div>
         </CardContent>
       </Card>
 

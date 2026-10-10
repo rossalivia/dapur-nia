@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Pesanan, PesananStatus } from '@/types';
 import { PesananCard } from './PesananCard';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 interface PesananListProps {
   pesananList: Pesanan[];
@@ -15,10 +17,25 @@ export const PesananList: React.FC<PesananListProps> = ({
   onAddNew,
 }) => {
   const [activeFilter, setActiveFilter] = useState<'semua' | PesananStatus>('semua');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filtered = pesananList.filter((p) => {
-    if (activeFilter === 'semua') return true;
-    return p.status === activeFilter;
+    // Status Filter
+    if (activeFilter !== 'semua' && p.status !== activeFilter) {
+      return false;
+    }
+
+    // Search query filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchCustomer = p.nama_pelanggan.toLowerCase().includes(q);
+      const matchPhone = p.pelanggan_id.includes(q);
+      const matchMenu = p.nama_menu.toLowerCase().includes(q);
+      const matchDate = p.tanggal.includes(q);
+      return matchCustomer || matchPhone || matchMenu || matchDate;
+    }
+
+    return true;
   });
 
   const filterTabs: { id: 'semua' | PesananStatus; label: string; count: number }[] = [
@@ -35,7 +52,7 @@ export const PesananList: React.FC<PesananListProps> = ({
     },
     {
       id: 'diproses',
-      label: 'Diproses',
+      label: 'Dimasak',
       count: pesananList.filter((p) => p.status === 'diproses').length,
     },
     {
@@ -63,23 +80,34 @@ export const PesananList: React.FC<PesananListProps> = ({
 
   return (
     <div className="space-y-3">
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        <Input
+          placeholder="Cari pesanan (nama, no WA, menu)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 h-9 text-xs bg-card"
+        />
+      </div>
+
       {/* Status Filter Horizontal Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
         {filterTabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveFilter(tab.id)}
-            className={`px-3 py-1.5 rounded-full font-medium whitespace-nowrap transition-all flex items-center gap-1 text-xs ${
+            className={`px-3 py-1.5 rounded-full font-medium whitespace-nowrap transition-all flex items-center gap-1.5 text-xs ${
               activeFilter === tab.id
-                ? 'bg-primary text-primary-foreground shadow-sm'
+                ? 'bg-primary text-primary-foreground font-bold shadow-xs'
                 : 'bg-muted/70 text-muted-foreground hover:bg-muted'
             }`}
           >
             <span>{tab.label}</span>
             <span
-              className={`text-[10px] px-1 rounded-full ${
+              className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                 activeFilter === tab.id
-                  ? 'bg-primary-foreground/20 text-primary-foreground'
+                  ? 'bg-primary-foreground/20 text-primary-foreground font-bold'
                   : 'bg-background text-muted-foreground'
               }`}
             >
@@ -91,7 +119,7 @@ export const PesananList: React.FC<PesananListProps> = ({
 
       {filtered.length === 0 ? (
         <p className="text-xs text-center text-muted-foreground py-8">
-          Tidak ada pesanan dengan status '{activeFilter}'.
+          Tidak ada pesanan yang cocok dengan pencarian atau filter '{activeFilter}'.
         </p>
       ) : (
         <div className="space-y-2.5">

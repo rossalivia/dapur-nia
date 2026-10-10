@@ -15,6 +15,20 @@ interface MenuCardProps {
   role?: UserRole | null;
 }
 
+function getFoodEmoji(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes('ayam')) return '🍗';
+  if (n.includes('nasi')) return '🍛';
+  if (n.includes('sapi') || n.includes('daging') || n.includes('rendang')) return '🥩';
+  if (n.includes('ikan')) return '🐟';
+  if (n.includes('udang') || n.includes('cumi')) return '🍤';
+  if (n.includes('sayur') || n.includes('capcay') || n.includes('sop') || n.includes('salad')) return '🥗';
+  if (n.includes('mie') || n.includes('bihun')) return '🍜';
+  if (n.includes('tahu') || n.includes('tempe')) return '🧈';
+  if (n.includes('telur') || n.includes('telor')) return '🍳';
+  return '🍱';
+}
+
 export const MenuCard: React.FC<MenuCardProps> = ({
   menu,
   onEdit,
@@ -23,45 +37,69 @@ export const MenuCard: React.FC<MenuCardProps> = ({
   role = 'admin',
 }) => {
   const isOutOfStock = menu.sisa_porsi === 0;
+  const isLowStock = menu.sisa_porsi > 0 && menu.sisa_porsi <= 5;
+  const foodEmoji = getFoodEmoji(menu.nama);
 
   return (
     <Card
-      className={`relative overflow-hidden transition-all shadow-sm ${
-        isOutOfStock ? 'bg-muted/40 border-dashed' : 'bg-card'
+      className={`relative overflow-hidden transition-all shadow-xs hover:shadow-sm ${
+        isOutOfStock
+          ? 'bg-muted/40 border-dashed opacity-85'
+          : 'bg-card hover:border-primary/40'
       }`}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h3
-                className={`font-semibold text-base truncate ${
-                  isOutOfStock ? 'text-muted-foreground' : 'text-foreground'
-                }`}
-              >
-                {menu.nama}
-              </h3>
-              {isOutOfStock ? (
-                <Badge variant="destructive" className="text-[10px] font-bold px-1.5 py-0">
-                  Habis
-                </Badge>
-              ) : (
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] font-medium px-1.5 py-0 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                >
-                  Sisa: {menu.sisa_porsi} porsi
-                </Badge>
-              )}
-              {role === 'admin' && !menu.tersedia && (
-                <Badge variant="outline" className="text-[10px] text-muted-foreground px-1.5 py-0">
-                  Disembunyikan
-                </Badge>
-              )}
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            {/* Food Avatar / Emoji */}
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl shadow-2xs border ${
+                isOutOfStock
+                  ? 'bg-muted border-border/50 opacity-60'
+                  : 'bg-primary/10 border-primary/20 text-primary'
+              }`}
+            >
+              {foodEmoji}
             </div>
-            <div className="text-sm font-bold text-primary">
-              {formatRupiah(menu.harga)}
-              <span className="text-xs font-normal text-muted-foreground ml-1">/ porsi</span>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                <h3
+                  className={`font-semibold text-sm truncate ${
+                    isOutOfStock ? 'text-muted-foreground line-through' : 'text-foreground'
+                  }`}
+                >
+                  {menu.nama}
+                </h3>
+
+                {isOutOfStock ? (
+                  <Badge variant="destructive" className="text-[10px] font-bold px-1.5 py-0">
+                    Habis
+                  </Badge>
+                ) : isLowStock ? (
+                  <Badge className="text-[10px] font-bold px-1.5 py-0 bg-amber-500 hover:bg-amber-600 text-white">
+                    🔥 Sisa {menu.sisa_porsi} porsi!
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] font-medium px-1.5 py-0 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                  >
+                    Sisa: {menu.sisa_porsi} porsi
+                  </Badge>
+                )}
+
+                {role === 'admin' && !menu.tersedia && (
+                  <Badge variant="outline" className="text-[10px] text-muted-foreground px-1.5 py-0 border-dashed">
+                    Disembunyikan
+                  </Badge>
+                )}
+              </div>
+
+              <div className="text-sm font-extrabold text-primary">
+                {formatRupiah(menu.harga)}
+                <span className="text-[11px] font-normal text-muted-foreground ml-1">/ porsi</span>
+              </div>
             </div>
           </div>
 
@@ -72,7 +110,9 @@ export const MenuCard: React.FC<MenuCardProps> = ({
                 size="sm"
                 disabled={isOutOfStock}
                 onClick={() => onOrder && onOrder(menu)}
-                className="h-8 text-xs gap-1.5 shadow-xs"
+                className={`h-8 text-xs gap-1.5 shadow-xs font-semibold ${
+                  isOutOfStock ? 'opacity-50' : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                }`}
               >
                 <ShoppingBag className="h-3.5 w-3.5" />
                 {isOutOfStock ? 'Habis' : 'Pesan'}

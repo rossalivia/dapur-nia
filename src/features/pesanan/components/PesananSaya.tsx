@@ -7,7 +7,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { Pesanan } from '@/types';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, MessageCircle, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const PesananSaya: React.FC = () => {
@@ -50,16 +50,23 @@ export const PesananSaya: React.FC = () => {
 
   return (
     <div className="space-y-4 pb-20">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
-          <ShoppingBag className="h-5 w-5 text-primary" />
-          Pesanan Saya
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          {profile?.nama
-            ? `Riwayat pesanan katering atas nama ${profile.nama}`
-            : 'Pantau status pesanan dan konfirmasi pembayaran Anda'}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight flex items-center gap-2 text-foreground">
+            <ShoppingBag className="h-5 w-5 text-primary" />
+            Pesanan Saya
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            {profile?.nama
+              ? `Riwayat pesanan katering atas nama ${profile.nama}`
+              : 'Pantau status hidangan katering & konfirmasi pembayaran Anda'}
+          </p>
+        </div>
+        {myPesanan.length > 0 && (
+          <span className="text-xs font-bold bg-primary/10 text-primary px-2.5 py-1 rounded-full border border-primary/20">
+            {myPesanan.length} Pesanan
+          </span>
+        )}
       </div>
 
       {loading && <LoadingState message="Memuat riwayat pesanan Anda..." />}
@@ -68,7 +75,7 @@ export const PesananSaya: React.FC = () => {
       {!loading && !error && myPesanan.length === 0 && (
         <EmptyState
           title="Belum Ada Pesanan"
-          description="Anda belum memiliki pesanan katering. Yuk, pilih menu lezat hari ini!"
+          description="Anda belum memiliki riwayat pesanan katering. Yuk, pilih menu lezat hari ini!"
           actionLabel="Lihat Menu Katering"
           onAction={() => navigate('/menu')}
         />
@@ -78,11 +85,28 @@ export const PesananSaya: React.FC = () => {
         <div className="space-y-3">
           {myPesanan.map((pesanan) => (
             <PesananCard
-              key={pesanan.id}
+              key={pesanan.id || `${pesanan.pelanggan_id}-${pesanan.tanggal}`}
               pesanan={pesanan}
               onClick={(p) => setSelectedPesanan(p)}
             />
           ))}
+
+          {/* Kartu Bantuan Customer Service */}
+          <div className="p-3.5 bg-muted/30 rounded-xl border border-border/70 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <HelpCircle className="h-4 w-4 text-primary shrink-0" />
+              <span>Ada pertanyaan seputar pesanan Anda?</span>
+            </div>
+            <a
+              href="https://wa.me/6281234567890?text=Halo%20Admin%20Dapur%20Nia,%20saya%20ingin%20bertanya%20seputar%20pesanan%20katering"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0 text-xs"
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              Tanya CS WA
+            </a>
+          </div>
         </div>
       )}
 
