@@ -1,4 +1,4 @@
-﻿**Working Paper: Praktik 1 Sesi 3**
+**Working Paper: Praktik 1 Sesi 3**
 
 Kasus Aplikasi Pemesanan Katering Dapur Nia
 
@@ -29,6 +29,6 @@ Kasus Aplikasi Pemesanan Katering Dapur Nia
 
 | State | Kondisi pemicu | Pesan | Tindakan pengguna | Sudah |
 | :---- | :---- | :---- | :---- | :---- |
-| Loading | Saat aplikasi pertama kali dibuka atau sedang mengambil/menyinkronkan data koleksi dari Cloud Firestore. | "Memuat daftar menu katering..." / "Memuat data pelanggan..." / "Memuat riwayat pesanan Anda..." | Menunggu hingga proses sinkronisasi data selesai; tombol aksi dinonaktifkan sementara untuk mencegah submit ganda. | [x] |
-| Empty | Saat koleksi belum memiliki dokumen atau kata kunci pencarian/filter status tidak menemukan data yang cocok. | "Belum Ada Menu" ("Daftar menu harian masih kosong. Tambahkan menu baru untuk mulai mengelola katering.") / "Belum Ada Pesanan" | Mengklik tombol CTA seperti "+ Tambah Menu", "+ Tambah Pelanggan", atau mereset filter/kata kunci pencarian. | [x] |
-| Error | Saat jaringan internet terputus, aturan Firestore menolak akses, atau pengguna memasukkan data form yang melanggar validasi. | "Gagal memuat data menu dari server." / Pesan validasi inline: "Nama menu maksimal 60 karakter", "Jumlah porsi minimal 1", dll. | Memperbaiki isian data sesuai petunjuk error inline, memeriksa koneksi internet, lalu menekan kembali tombol simpan. | [x] |
+| Loading | Saat aplikasi pertama kali dibuka atau sedang mengambil/menyinkronkan data koleksi dari Cloud Firestore. | "Memuat daftar menu katering..." / "Memuat data pelanggan..." / "Memuat riwayat pesanan Anda..." | Menunggu hingga proses sinkronisasi data selesai; tombol aksi dinonaktifkan sementara untuk mencegah submit ganda. | ✓ (Sudah) |
+| Empty | Saat koleksi belum memiliki dokumen atau kata kunci pencarian/filter status tidak menemukan data yang cocok. | "Belum Ada Menu" ("Daftar menu harian masih kosong. Tambahkan menu baru untuk mulai mengelola katering.") / "Belum Ada Pesanan" | Mengklik tombol CTA seperti "+ Tambah Menu", "+ Tambah Pelanggan", atau mereset filter/kata kunci pencarian. | ✓ (Sudah) |
+| Error | Saat jaringan internet terputus, aturan Firestore menolak akses, atau pengguna memasukkan data form yang melanggar validasi. | "Gagal memuat data menu dari server." / Pesan validasi inline: "Nama menu maksimal 60 karakter", "Jumlah porsi minimal 1", dll. | Memperbaiki isian data sesuai petunjuk error inline, memeriksa koneksi internet, lalu menekan kembali tombol simpan. | ✓ (Sudah) |
